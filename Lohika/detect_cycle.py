@@ -7,10 +7,10 @@ class Node:
 def detect_cycle(head):
     a = head
     b = head.next
-    while a and b and a != b:    
+    while a and b and b.next and a != b:    
         print a.data + " - " + b.data           
         a = a.next
-        b = b.next.next if b.next else None        
+        b = b.next.next
         
     return a == b
     
