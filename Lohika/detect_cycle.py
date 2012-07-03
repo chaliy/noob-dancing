@@ -1,3 +1,4 @@
+# Linked list, how to detect cycle
 class Node:    
 	def __init__(self, data, next):
 		self.data = data
