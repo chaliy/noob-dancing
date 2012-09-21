@@ -14,6 +14,7 @@ class Expr:
         self.isBinary = False
         self.isUnary = False
         self.isUnknown = False
+        self.isEmptyDisjunction = False
         
 class BinaryExpr(Expr):
     def __init__(self, left, right, op):
@@ -50,6 +51,7 @@ class UnknownExpr(Expr):
 class EmptyDisjunctionExpr(Expr):
     def __init__(self):
         Expr.__init__(self)
+        self.isEmptyDisjunction = True
         
     def __repr__(self):
         return '□'
@@ -65,6 +67,7 @@ def isContrary(e1, e2):
     return False
         
 def resolventa(e1, e2):
+    print str(e1) + ' vs ' + str(e2)
     # need something less stupid here,
     # kind of pattern matching should be good here
     if e1.isBinary and e2.isBinary:
@@ -81,25 +84,36 @@ def resolventa(e1, e2):
             return e2.right
     if isContrary(e1, e2):
         return EmptyDisjunctionExpr()
-    raise "Cannot resolve resolventa" 
+    raise Exception('Cannot find resolventa')
 
     
 # ˅ - OR
 # ˄ - AND
 # ¬ - NOT
 
+def disProoveSet(ss):
+    i = 0
+    while True:
+        ns = resolventa(ss[i], ss[i+1])
+        if ns. isEmptyDisjunction:
+            raise Exception('Disproved')
+        ss.append(ns)
+        i = i + 2
+
 p = UnknownExpr('p')
 q = UnknownExpr('q')
 
 f1 = BinaryExpr(UnaryExpr(p, 'NOT'), q, 'AND') # ¬p ˄ q
 f2 = UnaryExpr(q, 'NOT') # ¬q
-f3 = p # p
+f3 = UnaryExpr(p, 'NOT') # p
 
-s1 = BinaryExpr(UnaryExpr(p, 'NOT'), q, 'AND') # ¬p ˄ q
-s2 = UnaryExpr(q, 'NOT') # ¬q
-s3 = p # p
-s4 = resolventa(s1, s2)
-s5 = resolventa(s3, s4)
-print s5
+disProoveSet([f1, f2, f3])
+
+#s1 = BinaryExpr(UnaryExpr(p, 'NOT'), q, 'AND') # ¬p ˄ q
+#s2 = UnaryExpr(q, 'NOT') # ¬q
+#s3 = p # p
+#s4 = resolventa(s1, s2)
+#s5 = resolventa(s3, s4)
+#print s5
 
 print "Done"
