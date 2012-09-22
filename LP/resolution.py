@@ -1,119 +1,137 @@
 # coding=utf-8
+import string
 
-
-def dispalyOp(op):
-    if op == 'AND':
-        return '˄'; # Conjunction
-    if op == 'OR':
-        return '˅'; # Disjunction
-    if op == 'NOT':
-        return '¬';
+# Resolution Principle
+# http://mathworld.wolfram.com/ResolutionPrinciple.html
         
-class Expr:
-    def __init__(self):
-        self.isBinary = False
-        self.isUnary = False
-        self.isUnknown = False
-        self.isEmptyDisjunction = False
+class Expr(object):
+
+    def isEmptyDisjunction(self): return isinstance(self, EmptyDisjunctionExpr)
+    def isBinary(self): return isinstance(self, BinaryExpr)
+    def isUnary(self): return isinstance(self, UnaryExpr)
+    def isUnknown(self): return isinstance(self, UnknownExpr)
+    
+    # http://stackoverflow.com/questions/390250/elegant-ways-to-support-equivalence-equality-in-python-classes
+    def __eq__(self, other): 
+        if type(other) is type(self): 
+            return self.__dict__ == other.__dict__ 
+        else: 
+            return False 
+ 
+    def __ne__(self, other): 
+        return not self.__eq__(other) 
+
         
 class BinaryExpr(Expr):
     def __init__(self, left, right, op):
-        Expr.__init__(self)
         self.left = left
         self.right = right
         self.op = op # Connective
-        self.isBinary = True
-        
+
+    def _dispalyOp(self):
+        if self.op == "AND":
+            return "˄"; # Conjunction
+        if self.op == "OR":
+            return "˅"; # Disjunction
+            
     def __repr__(self):
-        return str(self.left) + ' ' + dispalyOp(self.op) + ' ' + str(self.right)
+        return str(self.left) + " " + self._dispalyOp() + " " + str(self.right)
 
 class UnaryExpr(Expr):
-    def __init__(self, val, op):
-        Expr.__init__(self)
+    def __init__(self, val, op):        
         self.val = val
         self.op = op
-        self.isUnary = True
         
     def __repr__(self):
-        if self.op == 'NOT':
+        if self.op == "NOT":
             return "¬" + str(self.val)
 
 
 class UnknownExpr(Expr):
     def __init__(self, n):
-        Expr.__init__(self)
         self.n = n
-        self.isUnknown = True
-    
+
     def __repr__(self):
         return self.n
 
 class EmptyDisjunctionExpr(Expr):
-    def __init__(self):
-        Expr.__init__(self)
-        self.isEmptyDisjunction = True
-        
+    
     def __repr__(self):
-        return '□'
-
+        return "□"
         
 def isContrary(e1, e2):
-    if e1.isUnary and e2.isUnknown:
-        if e1.op == 'NOT' and e1.val == e2:
+    if e1.isUnary() and e2.isUnknown():
+        if e1.op == "NOT" and e1.val == e2:
             return True
-    if e1.isUnknown and e2.isUnary:
-        if e1 == e2.val and e2.op == 'NOT':
+    if e1.isUnknown() and e2.isUnary():
+        if e1 == e2.val and e2.op == "NOT":
             return True
     return False
-        
-def resolventa(e1, e2):
-    print str(e1) + ' vs ' + str(e2)
-    # need something less stupid here,
-    # kind of pattern matching should be good here
-    if e1.isBinary and e2.isBinary:
-        print "B B"
-    if e1.isBinary and e2.isUnary:        
-        if isContrary(e1.right, e2):
-            return e1.left
-        if isContrary(e1.left, e2):
-            return e1.right
-    if e1.isUnary and e2.isBinary:        
-        if isContrary(e1, e2.right):
-            return e2.left
-        if isContrary(e1, e2.left):
-            return e2.right
-    if isContrary(e1, e2):
-        return EmptyDisjunctionExpr()
-    raise Exception('Cannot find resolventa')
 
+def findConjunctions(e):
+    if e.isBinary() and e.op == "OR":
+        return [e.right, e.left]
+    if (e.isUnary()) or e.isUnknown():
+        return [e]
+
+def resolvent(e1, e2):
+    sc1 = findConjunctions(e1)
+    sc2 = findConjunctions(e2)
     
+    for sc1i in sc1:  
+        for sc2i in sc2:
+            if isContrary(sc1i, sc2i):
+                sc1r = filter(lambda x: x != sc1i, sc1)
+                sc2r = filter(lambda x: x != sc2i, sc2)
+                if len(sc1r) == 0 and len(sc2r) == 0:
+                    return EmptyDisjunctionExpr()
+                if len(sc1r) == 1 and len(sc2r) == 0:
+                    return sc1r[0]
+                if len(sc1r) == 0 and len(sc2r) == 1:
+                    return sc2r[0]
+                if len(sc1r) == 1 and len(sc2r) == 1:
+                    return BinaryExpr(sc1r[0], sc2r[0], "OR")
+                raise Exception("Making resolvent from " + str(sc1r) + " and " + str(sc2r) + " failed")           
+
+def disproveSet(ss):
+    print "Disprove set of " + str(ss)    
+    while True:
+        e1 = ss[0]
+        for e2 in filter(lambda x: x != e1, ss):
+            ns = resolvent(e1, e2)
+            print "    resolvent for " +  str(e1) + " and " + str(e2) + " is " + str(ns)
+            if ns == None:
+                continue
+            if ns.isEmptyDisjunction():
+                return "Disproved"
+            ss.append(ns)
+            ss.remove(e1)
+            ss.remove(e2)
+            break;
+        else:
+            return "Cannot disprove";        
+
+p = UnknownExpr("p")
+q = UnknownExpr("q")
+r = UnknownExpr("r")
+s = UnknownExpr("s")
+
+
+print "Result: " + disproveSet([
+    BinaryExpr(UnaryExpr(p, "NOT"), q, "OR"), # ¬p ˅ q
+    UnaryExpr(q, "NOT"), # ¬q
+    p # p
+    ])
+
+
+print "Result: " + disproveSet([
+    BinaryExpr(p, q, "OR"), # p ˅ q
+    BinaryExpr(UnaryExpr(p, "NOT"), r, "OR"), # ¬p ˅ r
+    BinaryExpr(UnaryExpr(q, "NOT"), s, "OR"), # ¬q ˅ s
+    UnaryExpr(r, "NOT"), # ¬r
+    UnaryExpr(s, "NOT"), # ¬s
+    ])
+
 # ˅ - OR
 # ˄ - AND
 # ¬ - NOT
-
-def disProoveSet(ss):
-    i = 0
-    while True:
-        ns = resolventa(ss[i], ss[i+1])
-        if ns. isEmptyDisjunction:
-            raise Exception('Disproved')
-        ss.append(ns)
-        i = i + 2
-
-p = UnknownExpr('p')
-q = UnknownExpr('q')
-
-f1 = BinaryExpr(UnaryExpr(p, 'NOT'), q, 'AND') # ¬p ˄ q
-f2 = UnaryExpr(q, 'NOT') # ¬q
-f3 = UnaryExpr(p, 'NOT') # p
-
-disProoveSet([f1, f2, f3])
-
-#s1 = BinaryExpr(UnaryExpr(p, 'NOT'), q, 'AND') # ¬p ˄ q
-#s2 = UnaryExpr(q, 'NOT') # ¬q
-#s3 = p # p
-#s4 = resolventa(s1, s2)
-#s5 = resolventa(s3, s4)
-#print s5
-
-print "Done"
