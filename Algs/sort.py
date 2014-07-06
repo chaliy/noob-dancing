@@ -19,7 +19,7 @@ def insertion_sort_steps(data):
     for i in range(1,len(data)):        
         j = i
         while j > 0 and data[j] < data[j - 1]:
-            data[j],data[j - 1] = data[j - 1], data[j]
+            _exh(data, j, j - 1)
             yield data
             j -= 1
 
@@ -59,48 +59,69 @@ def shell_sort_steps(data):
 def shell_sort(data):
     return _last(shell_sort_steps(data))
 
+def merge(data1, data2):
+    s = data1 + data2
+    i1 = 0
+    i2 = 0
 
-def recursive_merge_sort(data):    
+    # Merge
+    for k in range(len(s)):
+        if i1 >= len(data1):
+            s[k] = data2[i2]
+            i2 += 1
+        elif i2 >= len(data2):
+            s[k] = data1[i1]
+            i1 += 1
+        elif _less(data2[i2], data1[i1]):
+            s[k] = data2[i2]
+            i2 += 1
+        else:
+            s[k] = data1[i1]
+            i1 += 1
 
-    def merge(data1, data2):
-        sorted_data = [0 for x in range(len(data1) + len(data2))]
-
-        data1_index = 0
-        data2_index = 0
-
-        # Merge
-
-        for k in range(0, len(sorted_data)):
-            if data1_index >= len(data1):
-                sorted_data[k] = data2[data2_index]
-                data2_index += 1
-            elif data2_index >= len(data2):
-                sorted_data[k] = data1[data1_index]
-                data1_index += 1
-            elif _less(data2[data2_index], data1[data1_index]):
-                sorted_data[k] = data2[data2_index]
-                data2_index += 1
-            else:
-                sorted_data[k] = data1[data1_index]
-                data1_index += 1
-
-        return sorted_data
+    return s
 
 
-    def rec_merge_sort(data):
+def recursive_merge_sort(data):
+
+
+    def sort(data):
 
         l = len(data)
 
         if l == 1:
         	return data
 
-        data1 = rec_merge_sort(data[:l//2])
-        data2 = rec_merge_sort(data[l//2:])
+        data1 = sort(data[:l//2])
+        data2 = sort(data[l//2:])
+
+        if _less(data2[0], data1[-1]) == False:
+            return data1 + data2
 
         return merge(data1, data2)
 
-    sorted_data = rec_merge_sort(data)
-    return sorted_data
+    return sort(data)
+
+def merge_sort(data):
+
+    N = len(data)
+    s = copy(data)
+
+    sz = 1
+    while sz < N:
+
+        lo = 0
+        while lo < N-sz:
+            mid = lo+sz
+            hi = min(lo+sz+sz, N)
+
+            s[lo:hi] = merge(s[lo:mid], s[mid:hi])
+            lo += sz+sz
+
+        sz = sz+sz
+
+
+    return s
 
 
 
@@ -189,5 +210,7 @@ def knuth_shuffle(data):
 if __name__ == '__main__':
     data = [29,100,130,4,6,13,19,20]
 
-    for step in shell_sort_steps(data):    
-        print("#", step)
+    # for step in shell_sort_steps(data):    
+    #     print("#", step)
+
+    #print(merge_sort(data))
