@@ -60,6 +60,8 @@ def shell_sort(data):
     return _last(shell_sort_steps(data))
 
 def merge(data1, data2):
+    # NOTE does not uses inplace changes
+
     s = data1 + data2
     i1 = 0
     i2 = 0
@@ -83,7 +85,7 @@ def merge(data1, data2):
 
 
 def recursive_merge_sort(data):
-
+    # NOTE does not uses inplace changes
 
     def sort(data):
 
@@ -103,6 +105,7 @@ def recursive_merge_sort(data):
     return sort(data)
 
 def merge_sort(data):
+    # NOTE does not uses inplace changes
 
     N = len(data)
     s = copy(data)
@@ -128,49 +131,48 @@ def merge_sort(data):
 def knuth_shuffle(data):
     import random    
 
-    def exh(a,b):        
-        data[a],data[b] = data[b], data[a]
-
     n = len(data)
     
     for i in range(1, n):
         new_i = random.randint(0, i)
-        exh(new_i, i)
+        _exh(data, new_i, i)
     
     return data
 
 
-# def quick_sort(data):
-#     def partition(a, lo, hi):
-#         i = lo - 1
-#         j = hi
-#         while True:
-#             # Left
-#             while (_less(a[i], a[lo])):
-#                 i += 1
-#                 if i > hi: break
-#             # Right
-#             while (_less(a[lo], a[j])):
-#                 j -= 1
-#                 if (j < lo): break
+def quick_sort(data):
+    def partition(a, lo, hi):
+        i = lo + 1
+        j = hi
+        while True:
+            # Left
+            while _less(a[i], a[lo]):
+                i += 1
+                if i > hi: break
 
-#             if (i >= j): break
+            # Right
+            while _less(a[lo], a[j]):
+                j -= 1
+                if j < lo: break
 
-#             _exh(a, i, j)
-#         _exh(a, lo, j)
-#         return j
+            if i >= j: break
 
-#     def sort(a, lo, hi):
-#         if (hi <= lo):
-#             return
-#         j = partition(a, lo, hi)
-#         sort(a, lo, j-1)
-#         sort(a, j+1, hi)
+            _exh(a, i, j)
+        _exh(a, lo, j)
+        return j
 
-#     knuth_shuffle(data)
-#     sort(data, 0, len(data) - 1)
+    def sort(a, lo, hi):
+        if (hi <= lo):
+            return
 
-#     return data
+        j = partition(a, lo, hi)
+        sort(a, lo, j-1)
+        sort(a, j+1, hi)
+
+    knuth_shuffle(data)
+    sort(data, 0, len(data) - 1)
+
+    return data
 
 # def dijkstra_quick_sort(data):
 
@@ -183,18 +185,18 @@ def knuth_shuffle(data):
 #             return -1;
 
 #     def sort(a, lo, hi):
-#         if (hi <= lo): return
+#         if hi <= lo: return
 #         lt = lo
 #         gt = hi
 #         v = a[lo]
 #         i = lo;
-#         while (i <= gt):
+#         while i <= gt:
 #             c = compare(a[i], v)
-#             if (c < 0):
+#             if c < 0:
 #                 lt += 1
 #                 i += 1 
 #                 _exh(a, lt, i)
-#             elif (c > 0): 
+#             elif c > 0: 
 #                 gt -= 1
 #                 _exh(a, i, gt)
 #             else: i += 1
