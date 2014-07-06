@@ -174,39 +174,42 @@ def quick_sort(data):
 
     return data
 
-# def dijkstra_quick_sort(data):
 
-#     def compare(x,y):
-#         if x == y:
-#             return 0;
-#         elif x > y:
-#             return +1;
-#         else:
-#             return -1;
+def dijkstra_quick_sort(data):
 
-#     def sort(a, lo, hi):
-#         if hi <= lo: return
-#         lt = lo
-#         gt = hi
-#         v = a[lo]
-#         i = lo;
-#         while i <= gt:
-#             c = compare(a[i], v)
-#             if c < 0:
-#                 lt += 1
-#                 i += 1 
-#                 _exh(a, lt, i)
-#             elif c > 0: 
-#                 gt -= 1
-#                 _exh(a, i, gt)
-#             else: i += 1
+    def compare(x, y):
+        if x == y:
+            return 0
+        elif x > y:
+            return +1
+        else:
+            return -1
+
+    def sort(a, lo, hi):
+        if hi <= lo:
+            return
+        lt = lo
+        gt = hi  
+        i = lo
+        v = a[lo]
+        while i <= gt:
+            c = compare(a[i], v)            
+            if c < 0:
+                _exh(a, lt, i)
+                lt += 1
+                i += 1 
+            elif c > 0:
+                _exh(a, i, gt) 
+                gt -= 1
+            else:
+                i += 1
         
-#         sort(a, lo, lt - 1)
-#         sort(a, gt + 1, hi)
+        sort(a, lo, lt-1)
+        sort(a, gt+1, hi)
 
-#     sort(data, 0, len(data) - 1)
+    sort(data, 0, len(data) - 1)
 
-#     return data
+    return data
 
 
 if __name__ == '__main__':
@@ -216,3 +219,5 @@ if __name__ == '__main__':
     #     print("#", step)
 
     #print(merge_sort(data))
+
+    print(dijkstra_quick_sort([23, 55, 47, 35, 10, 90, 84, 30]))
