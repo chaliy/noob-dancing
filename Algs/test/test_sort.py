@@ -20,10 +20,10 @@ class TestSort(unittest.TestCase):
     #     result = quick_sort(data)        
     #     self.assertEqual(result, [10, 23, 30, 35, 47, 55, 84, 90])
 
-    def test_dijkstra_quick_sort(self):        
-        data = [23, 55, 47, 35, 10, 90, 84, 30]
-        result = dijkstra_quick_sort(data)        
-        self.assertEqual(result, [10, 23, 30, 35, 47, 55, 84, 90])
+    # def test_dijkstra_quick_sort(self):        
+    #     data = [23, 55, 47, 35, 10, 90, 84, 30]
+    #     result = dijkstra_quick_sort(data)        
+    #     self.assertEqual(result, [10, 23, 30, 35, 47, 55, 84, 90])
 
     def test_selection_sort(self):
         data = list("SELECTIONSORT")
