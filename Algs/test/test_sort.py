@@ -3,7 +3,6 @@ import unittest
 
 from sort import *
 
-
 class TestSort(unittest.TestCase):
   
     def test_insertion_sort(self):        
@@ -21,11 +20,21 @@ class TestSort(unittest.TestCase):
         result = merge_sort(data)        
         self.assertEqual(result, [10, 23, 30, 35, 47, 55, 84, 90])
 
+    def test_inplace_merge_top_down_sort(self):        
+        data = [23, 55, 47, 35, 10, 90, 84, 30]
+        result = inplace_merge_top_down_sort(data)        
+        self.assertEqual(result, [10, 23, 30, 35, 47, 55, 84, 90])
+
     def test_quick_sort(self):        
         data = [23, 55, 47, 35, 10, 90, 84, 30]
         result = quick_sort(data)        
         self.assertEqual(result, [10, 23, 30, 35, 47, 55, 84, 90])
 
+    def test_heap_sort(self):        
+        data = [23, 55, 47, 35, 10, 90, 84, 30]
+        result = heap_sort(data)        
+        self.assertEqual(result, [10, 23, 30, 35, 47, 55, 84, 90])
+    
     def test_dijkstra_quick_sort(self):        
         data = [23, 55, 47, 35, 10, 90, 84, 30]
         result = dijkstra_quick_sort(data)        

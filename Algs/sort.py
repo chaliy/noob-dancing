@@ -1,17 +1,21 @@
 # coding=utf8
 from copy import copy
 
-def _exh(data,a,b):
+
+def _exch(data,a,b):
     data[a], data[b] = data[b], data[a]
+
 
 def _less(a,b):        
     return a < b
+
 
 def _last(iter):
     result = None
     for i in iter:
         result = i
-    return result;
+    return result
+
 
 def insertion_sort_steps(data):
     data = copy(data)
@@ -19,12 +23,14 @@ def insertion_sort_steps(data):
     for i in range(1,len(data)):        
         j = i
         while j > 0 and data[j] < data[j - 1]:
-            _exh(data, j, j - 1)
+            _exch(data, j, j - 1)
             yield data
             j -= 1
 
+
 def insertion_sort(data):
     return _last(insertion_sort_steps(data))
+
 
 def selection_sort_steps(data):
     data = copy(data)
@@ -34,11 +40,13 @@ def selection_sort_steps(data):
         for j in range(i, len(data)):
             if _less(data[j], data[m]):
                 m = j
-        _exh(data, i,m)
+        _exch(data, i,m)
         yield data
+
 
 def selection_sort(data):
     return _last(selection_sort_steps(data))
+
 
 def shell_sort_steps(data):
     data = copy(data)
@@ -52,12 +60,14 @@ def shell_sort_steps(data):
         for i in range(h, n):
             for j in range(i, h-1, -h):
                 if data[j] < data[j-h]:
-                    _exh(data, j, j-h)
+                    _exch(data, j, j-h)
                     yield data
         h = int(h/3)
 
+
 def shell_sort(data):
     return _last(shell_sort_steps(data))
+
 
 def merge(data1, data2):
     # NOTE does not uses inplace changes
@@ -84,6 +94,52 @@ def merge(data1, data2):
     return s
 
 
+def inplace_merge_top_down_sort_steps(a):
+
+    # Port of Sedgewick impl
+
+    steps = []
+
+    def inplace_merge(a, aux, lo, mid, hi):
+    
+        for k in range(lo, hi+1):
+            aux[k] = a[k]
+
+        i = lo
+        j = mid+1
+        for k in range(lo, hi+1):        
+            if i > mid:
+                a[k] = aux[j]
+                j += 1
+            elif j > hi:
+                a[k] = aux[i]
+                i += 1
+            elif _less(aux[j], aux[i]):
+                a[k] = aux[j]
+                j +=1
+            else:
+                a[k] = aux[i]
+                i += 1    
+
+    def sort(a, aux, lo, hi):
+        if hi <= lo: 
+            return
+        mid = int(lo + (hi - lo) / 2)
+        sort(a, aux, lo, mid)
+        sort(a, aux, mid+1, hi)
+        inplace_merge(a, aux, lo, mid, hi)
+        steps.append(copy(a))
+        
+    aux = copy(a)
+    sort(copy(a), aux, 0, len(a) - 1)
+
+    return steps
+
+
+def inplace_merge_top_down_sort(data):
+    return _last(inplace_merge_top_down_sort_steps(data))
+
+
 def recursive_merge_sort(data):
     # NOTE does not uses inplace changes
 
@@ -92,17 +148,18 @@ def recursive_merge_sort(data):
         l = len(data)
 
         if l == 1:
-        	return data
+            return data
 
         data1 = sort(data[:l//2])
         data2 = sort(data[l//2:])
 
-        if _less(data2[0], data1[-1]) == False:
+        if not _less(data2[0], data1[-1]):
             return data1 + data2
 
         return merge(data1, data2)
 
     return sort(data)
+
 
 def merge_sort(data):
     # NOTE does not uses inplace changes
@@ -127,7 +184,6 @@ def merge_sort(data):
     return s
 
 
-
 def knuth_shuffle(data):
     import random    
 
@@ -135,30 +191,34 @@ def knuth_shuffle(data):
     
     for i in range(1, n):
         new_i = random.randint(0, i)
-        _exh(data, new_i, i)
+        _exch(data, new_i, i)
     
     return data
 
 
-def quick_sort(data):
+def quick_sort_steps(data):
+    steps = []
     def partition(a, lo, hi):
-        i = lo + 1
-        j = hi
+        # TODO Fails on list("BBBBBAAABBBA")
+        i = lo
+        j = hi + 1
+        v = a[lo]
         while True:
             # Left
-            while _less(a[i], a[lo]):
+            while i < hi:
                 i += 1
-                if i > hi: break
-
+                if not _less(a[i], v):
+                    break
             # Right
-            while _less(a[lo], a[j]):
+            while j > lo:
                 j -= 1
-                if j < lo: break
+                if not _less(v, a[j]):
+                    break
 
             if i >= j: break
 
-            _exh(a, i, j)
-        _exh(a, lo, j)
+            _exch(a, i, j)
+        _exch(a, lo, j)
         return j
 
     def sort(a, lo, hi):
@@ -168,11 +228,18 @@ def quick_sort(data):
         j = partition(a, lo, hi)
         sort(a, lo, j-1)
         sort(a, j+1, hi)
+        steps.append(copy(a))
 
-    knuth_shuffle(data)
+    data = copy(data)
     sort(data, 0, len(data) - 1)
 
-    return data
+    return steps
+
+
+def quick_sort(data):
+    data = copy(data)
+    knuth_shuffle(data)
+    return _last(quick_sort_steps(data))
 
 
 def dijkstra_quick_sort(data):
@@ -195,11 +262,11 @@ def dijkstra_quick_sort(data):
         while i <= gt:
             c = compare(a[i], v)            
             if c < 0:
-                _exh(a, lt, i)
+                _exch(a, lt, i)
                 lt += 1
                 i += 1 
             elif c > 0:
-                _exh(a, i, gt) 
+                _exch(a, i, gt)
                 gt -= 1
             else:
                 i += 1
@@ -212,12 +279,41 @@ def dijkstra_quick_sort(data):
     return data
 
 
+def heap_sort_steps(data):
+
+    steps = []
+
+    def sink(data, k, N):
+        while 2*k <= N:
+            j = 2*k
+            if j < N and _less(data[j-1], data[j]):
+                j += 1
+            if not _less(data[k-1], data[j-1]):
+                break
+            _exch(data, k-1, j-1)
+            k = j
+    
+    data = copy(data)
+    N = len(data)
+    for k in range(int(N/2), 0, -1):        
+        sink(data, k, N)
+
+    while N > 1:
+        _exch(data, 0, N-1)
+        N -= 1
+        sink(data, 1, N)
+
+        steps.append(copy(data))
+
+    return steps
+
+
+def heap_sort(data):
+    return _last(heap_sort_steps(data))
+
+
+
 if __name__ == '__main__':
-    data = [29,100,130,4,6,13,19,20]
+    data = ['frog', 'crab', 'seal', 'goat', 'wasp', 'mink', 'kiwi', 'moth', 'pony', 'bear', 'worm', 'slug', 'deer', 'carp', 'tuna', 'hoki', 'dove', 'hare', 'lion', 'duck', 'mule', 'swan', 'ibex', 'bass']
 
-    # for step in shell_sort_steps(data):    
-    #     print("#", step)
-
-    #print(merge_sort(data))
-
-    print(dijkstra_quick_sort([23, 55, 47, 35, 10, 90, 84, 30]))
+    # print(inplace_merge_top_down_sort_steps(data))
